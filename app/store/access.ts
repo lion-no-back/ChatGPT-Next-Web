@@ -12,7 +12,9 @@ import { ensure } from "../utils/clone";
 let fetchState = 0; // 0 not fetch, 1 fetching, 2 done
 
 const DEFAULT_OPENAI_URL =
-  getClientConfig()?.buildMode === "export" ? DEFAULT_API_HOST : ApiPath.OpenAI;
+  getClientConfig()?.buildMode === "export"
+    ? DEFAULT_API_HOST + "/api/proxy/openai"
+    : ApiPath.OpenAI;
 
 const DEFAULT_ACCESS_STATE = {
   accessCode: "",
@@ -33,6 +35,11 @@ const DEFAULT_ACCESS_STATE = {
   googleUrl: "",
   googleApiKey: "",
   googleApiVersion: "v1",
+
+  // anthropic
+  anthropicApiKey: "",
+  anthropicApiVersion: "2023-06-01",
+  anthropicUrl: "",
 
   // server config
   needCode: true,
@@ -65,6 +72,10 @@ export const useAccessStore = createPersistStore(
       return ensure(get(), ["googleApiKey"]);
     },
 
+    isValidAnthropic() {
+      return ensure(get(), ["anthropicApiKey"]);
+    },
+
     isAuthorized() {
       this.fetch();
 
@@ -73,6 +84,7 @@ export const useAccessStore = createPersistStore(
         this.isValidOpenAI() ||
         this.isValidAzure() ||
         this.isValidGoogle() ||
+        this.isValidAnthropic() ||
         !this.enabledAccessControl() ||
         (this.enabledAccessControl() && ensure(get(), ["accessCode"]))
       );
